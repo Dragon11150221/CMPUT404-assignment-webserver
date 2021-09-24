@@ -1,5 +1,8 @@
+#!/usr/bin/env python
 #  coding: utf-8
+
 import socketserver
+from datetime import datetime
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 #
@@ -40,18 +43,22 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         if self.directory:
             try:
+                now = datetime.now()
+                current_time = now.strftime("%Y-%m-%d %H:%M:%S")
                 result = self.open_file(self.directory)
                 temp = self.directory.split('.')
-                content_type = "Content-Type: text/%s;\r\n"%temp[1]
+                date = "Date: " + current_time +"\r\n"
+                content_length = "Content-Length: " + str(len(result))+"\r\n"
+                connection = "Connection: close\r\n"
+                content_type = "Content-Type: text/%s\r\n"%temp[1]
+
                 if self.redirect:
-                    self.response((self.statu_codes("301") + content_type +"\n"+ result))
+                    self.response((self.statu_codes("301") + date + content_length + connection + content_type +"\n"+ result))
                 else:
-                    self.response((self.statu_codes("200") + content_type +"\n"+ result))
+                    self.response((self.statu_codes("200") + date + content_length + connection + content_type +"\n"+ result))
 
             except Exception as e:
-                #raise HTTPError(404, self.statu_codes("404"))
-
-                #raise HTTPError(self.statu_codes("404"))
+                print(e)
                 self.response((self.statu_codes("404") +"\n"))
 
     def statu_codes(self,code):
